@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>🛡️ Simulador Ciberseguridad: ¡Reto Protección de Datos! ⚖️</title>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --text-main: #c9d1d9;
+            --text-muted: #8b949e;
+            --accent: #58a6ff;
+            --success: #3fb950;
+            --error: #f85149;
+            --border: #30363d;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            max-width: 750px;
+            width: 100%;
+            padding: 30px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+        }
+
+        h1 {
+            color: var(--accent);
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 1.6rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 25px;
+            font-size: 0.9rem;
+        }
+
+        .progress-container {
+            background-color: var(--bg-color);
+            border-radius: 10px;
+            height: 12px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background-color: var(--accent);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+
+        .stats span {
+            color: var(--accent);
+        }
+
+        .question-card {
+            margin-bottom: 25px;
+        }
+
+        .question-number {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-btn {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            text-align: left;
+            transition: all 0.2s;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--accent);
+            background-color: rgba(88, 166, 255, 0.1);
+        }
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+        }
+
+        .option-btn.correct {
+            background-color: rgba(63, 185, 80, 0.2);
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .option-btn.incorrect {
+            background-color: rgba(248, 81, 73, 0.2);
+            border-color: var(--error);
+            color: var(--error);
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+            line-height: 1.4;
+            font-size: 0.95rem;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.correct-bg {
+            background-color: rgba(63, 185, 80, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+
+        .feedback.incorrect-bg {
+            background-color: rgba(248, 81, 73, 0.1);
+            border: 1px solid var(--error);
+            color: var(--error);
+        }
+
+        .action-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            transition: background 0.2s;
+        }
+
+        .next-btn {
+            background-color: var(--accent);
+            color: var(--bg-color);
+            flex: 2;
+            display: none;
+        }
+
+        .next-btn:hover {
+            background-color: #79b8ff;
+        }
+
+        .exit-btn {
+            background-color: #21262d;
+            border: 1px solid var(--border);
+            color: var(--error);
+            flex: 1;
+        }
+
+        .exit-btn:hover {
+            background-color: #f8514920;
+            border-color: var(--error);
+        }
+
+        .setup-screen, .end-screen {
+            text-align: center;
+        }
+
+        .setup-screen h2, .end-screen h2 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+
+        .setup-screen p {
+            color: var(--text-muted);
+            margin-bottom: 25px;
+        }
+
+        .mode-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 350px;
+            margin: 0 auto;
+        }
+
+        .mode-btn {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .mode-btn:hover {
+            border-color: var(--accent);
+            background-color: rgba(88, 166, 255, 0.1);
+        }
+
+        .final-score {
+            font-size: 1.2rem;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .code-style {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--bg-color);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="quiz-container">
+        <div id="setup-screen" class="setup-screen">
+            <h1>⚖️ Tema 1: Protección de Datos Personales 🛡️</h1>
+            <p>¡Configura tu sesión de entrenamiento de cumplimiento legal! Las preguntas saldrán en estricto orden aleatorio y nunca se repetirán durante la partida. 🎲</p>
+            <div class="mode-options">
+                <button class="mode-btn" onclick="startGame(10)">☕ Partida Rápida (10 Preguntas)</button>
+                <button class="mode-btn" onclick="startGame(20)">⚖️ Examen Medio (20 Preguntas)</button>
+                <button class="mode-btn" onclick="startGame(40)">🔥 Desafío de Cumplimiento (40 Preguntas)</button>
+            </div>
+        </div>
+
+        <div id="game-screen" style="display: none;">
+            <h1 style="font-size: 1.3rem;">🧠 Repaso de Legislación y Regulación</h1>
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+
+            <div class="stats">
+                <div>📋 Pregunta actual: <span id="q-counter">0/0</span></div>
+                <div>✨ Puntos acumulados: <span id="score">0</span></div>
+            </div>
+
+            <div class="question-card" id="question-card">
+                <div class="question-number" id="question-number">Pregunta 1</div>
+                <div class="question-text" id="question-text"></div>
+                <div class="options" id="options-container"></div>
+                <div class="bottom-feedback" style="margin-top: 15px;"></div>
+                <div class="feedback" id="feedback"></div>
+            </div>
+
+            <div class="action-container">
+                <button class="btn exit-btn" id="exit-btn" onclick="showEndScreen(true)">🚪 Abandono Seguro</button>
+                <button class="btn next-btn" id="next-btn">Siguiente Precepto ➡️</button>
+            </div>
+        </div>
+
+        <div class="end-screen" id="end-screen" style="display: none;">
+            <h2 id="end-title">🏁 ¡Simulacro Concluido!</h2>
+            <p class="final-score" id="final-score"></p>
+            <button class="btn next-btn" onclick="returnToMenu()" style="display: block; width: 100%;">🔄 Volver al Menú de Ajustes</button>
+        </div>
+    </div>
+
+    <script>
+        const allQuestions = [
+            {
+                question: "⚖️ ¿Cuál es la naturaleza jurídica del derecho fundamental a la protección de datos personales en el ordenamiento español?",
+                options: [
+                    "Es un derecho que depende jerárquicamente del derecho al honor corporativo.",
+                    "Es un derecho fundamental plenamente autónomo e independiente del derecho a la intimidad.",
+                    "Es una mera extensión de la ley ordinaria de telecomunicaciones.",
+                    "Es un derecho supeditado exclusivamente al derecho a la intimidad familiar."
+                ],
+                correct: 1,
+                explanation: "El Tribunal Constitucional determinó que es independiente del derecho a la intimidad porque persiguen fines distintos: la intimidad protege el ámbito exclusivo; la protección de datos otorga el poder de control sobre los datos personales."
+            },
+            {
+                question: "📁 Según el RGPD, ¿qué constituye exactamente un 'dato de carácter personal'?",
+                options: [
+                    "Toda información comercial perteneciente a personas jurídicas legalmente constituidas.",
+                    "Toda información sobre una persona física identificada o identificable.",
+                    "Exclusivamente los registros de antecedentes penales de los usuarios.",
+                    "Únicamente los identificadores biométricos encriptados en hardware."
+                ],
+                correct: 1,
+                explanation: "El artículo 4.1 del RGPD define el dato personal como toda información sobre una persona física identificada o identificable, excluyendo expresamente a las personas jurídicas."
+            },
+            {
+                question: "🧠 ¿Qué significa el principio de 'responsabilidad proactiva' para el responsable de un tratamiento?",
+                options: [
+                    "Que debe externalizar obligatoriamente la auditoría informática a un tercero.",
+                    "Que debe ser responsable del cumplimiento de los principios de protección de datos y ser capaz de demostrarlo.",
+                    "Que solo actúa cuando recibe una sanción formal por parte de la AEPD.",
+                    "Que debe responder las solicitudes de los usuarios en menos de 24 horas."
+                ],
+                correct: 1,
+                explanation: "La responsabilidad proactiva exige que el responsable no solo cumpla pasivamente los principios, sino que tenga mecanismos auditables para demostrar dicho cumplimiento."
+            },
+            {
+                question: "💻 ¿A qué tipo de información NO se le aplica el marco regulatorio del RGPD ni de la LOPDGDD?",
+                options: [
+                    "A los datos de localización geográfica de un usuario móvil.",
+                    "Al tratamiento de datos referentes a personas jurídicas (empresas/organizaciones).",
+                    "A las direcciones IP estáticas asignadas a particulares.",
+                    "A los identificadores de seudonimización de clientes."
+                ],
+                correct: 1,
+                explanation: "Las normativas de protección de datos protegen a las personas físicas. El tratamiento de datos de personas jurídicas queda totalmente excluido de su ámbito de aplicación."
+            },
+            {
+                question: "🎯 ¿En qué consiste el principio de 'limitación de la finalidad' del tratamiento de datos?",
+                options: [
+                    "En almacenar los datos en un único servidor local centralizado.",
+                    "En recoger los datos con fines determinados, explícitos y legítimos, prohibiendo un tratamiento ulterior incompatible.",
+                    "En limitar la cantidad de datos que los empleados pueden visualizar en pantalla.",
+                    "En borrar automáticamente todos los registros del sistema cada 30 días."
+                ],
+                correct: 1,
+                explanation: "Los datos se capturan para un fin concreto y legítimo y no pueden usarse después para propósitos distintos o incompatibles con los originales."
+            },
+            {
+                question: "🛠️ ¿Cuál es la función definitoria que ostenta el 'Responsable del tratamiento'?",
+                options: [
+                    "Es el técnico encargado de realizar las copias de seguridad de la base de datos.",
+                    "Es la persona física o jurídica, autoridad pública u organismo que determina los fines y los medios del tratamiento.",
+                    "Es la empresa externa que presta servicios informáticos de soporte de red.",
+                    "Es el empleado contratado para responder de forma única las reclamaciones de los clientes."
+                ],
+                correct: 1,
+                explanation: "Lo que define al Responsable es su capacidad de decisión soberana sobre el objeto, el fin, el contenido y la utilización del tratamiento de datos."
+            },
+            {
+                question: "🤝 ¿Cómo se define el rol del 'Encargado del tratamiento' dentro del ecosistema normativo?",
+                options: [
+                    "Es el propietario legal absoluto de los ficheros de datos personales.",
+                    "Es la persona física o jurídica que trata datos personales por cuenta del responsable del tratamiento.",
+                    "Es la autoridad pública que sanciona los incidentes de ciberseguridad.",
+                    "Es el propio interesado cuyos datos de carácter sensible se procesan en la plataforma."
+                ],
+                correct: 1,
+                explanation: "El encargado es un tercero que presta un servicio al responsable y que, para ejecutarlo, necesita tratar los datos bajo las directrices y cuenta de dicho responsable."
+            },
+            {
+                question: "⏱️ Como regla general, ¿cuál es el plazo máximo que tiene el responsable para responder a los derechos de los interesados?",
+                options: [
+                    "Un plazo improrrogable de 72 horas desde la recepción de la solicitud.",
+                    "El plazo de un mes, el cual es prorrogable hasta dos meses más por complejidad o volumen.",
+                    "Fijamente 15 días hábiles según el código civil ordinario.",
+                    "Seis meses naturales desde que se registra la petición electrónica."
+                ],
+                correct: 1,
+                explanation: "El RGPD impone la obligación de responder en el plazo de un mes, permitiendo una prórroga de dos meses adicionales si la solicitud es compleja o masiva."
+            },
+            {
+                question: "🚨 Ante una violación de seguridad de datos que suponga un riesgo para los derechos de las personas, ¿de qué plazo dispone el responsable para notificar a la autoridad de control?",
+                options: [
+                    "Sin dilación indebida y, de ser posible, a más tardar 72 horas después de que haya tenido constancia de ella.",
+                    "Exactamente 24 horas naturales desde que ocurrió el ciberataque técnico.",
+                    "Un plazo flexible de 7 días hábiles de auditoría interna.",
+                    "No hay plazo fijo, basta con incluirlo en el informe anual de seguridad."
+                ],
+                correct: 0,
+                explanation: "El artículo 33 del RGPD fija un umbral estricto de un máximo de 72 horas para notificar la brecha a la autoridad de control desde que se tenga constancia de su existencia."
+            },
+            {
+                question: "🔏 Si los datos afectados en una brecha de seguridad contaban con medidas técnicas como el cifrado robusto que los hace ininteligibles para intrusos, ¿qué ocurre con la comunicación al interesado?",
+                options: [
+                    "Debe realizarse de forma obligatoria mediante burofax del estado.",
+                    "La comunicación al interesado no será necesaria por mitigación efectiva del alto riesgo.",
+                    "El responsable debe ser sancionado de manera inmediata sin derecho a defensa.",
+                    "Se debe publicar de forma obligatoria en el Boletín Oficial del Estado."
+                ],
+                correct: 1,
+                explanation: "Si los datos están fuertemente encriptados, el atacante no puede leerlos. Al no existir una probabilidad real de alto riesgo para el ciudadano, la ley exime de notificarle directamente."
+            },
+            {
+                question: "🛡️ ¿Cuál de las siguientes opciones describe una de las 'categorías especiales de datos' (datos sensibles) según el artículo 9 del RGPD?",
+                options: [
+                    "El saldo bancario actual y el historial de transacciones financieras ordinarias.",
+                    "Los datos que revelen el origen étnico o racial, las opiniones políticas, convicciones religiosas, datos genéticos y biométricos unívocos.",
+                    "La dirección de correo electrónico institucional y el puesto de trabajo técnico.",
+                    "Las marcas de dispositivos móviles y direcciones MAC utilizadas por los clientes."
+                ],
+                correct: 1,
+                explanation: "Las categorías especiales de datos abarcan información íntima y de alta sensibilidad (origen racial, afiliación sindical, salud, orientación sexual, datos biométricos e ideología)."
+            },
+            {
+                question: "📝 ¿Qué contenido mínimo debe tener el Registro de Actividades del Tratamiento (RAT) del encargado del tratamiento, a diferencia del responsable?",
+                options: [
+                    "Debe incluir obligatoriamente el presupuesto financiero del sistema de copias de seguridad.",
+                    "Su contenido es menor: incluye datos de contacto del encargado y responsables, categorías de tratamientos por cuenta de cada responsable y transferencias internacionales.",
+                    "Exclusivamente las contraseñas cifradas de los administradores de sistemas.",
+                    "El RAT del encargado es exactamente idéntico en tamaño y campos al del responsable."
+                ],
+                correct: 1,
+                explanation: "Al operar por cuenta ajena, el RAT del encargado es más reducido y se enfoca en las categorías de servicios prestados a cada responsable de fichero."
+            },
+            {
+                question: "🚫 ¿Qué derecho faculta a un ciudadano a exigir que sus datos personales dejen de utilizarse de forma inmediata para fines de marketing directo o publicidad?",
+                options: [
+                    "Derecho de limitación del tratamiento físico.",
+                    "Derecho de supresión anticipada.",
+                    "Derecho de oposición.",
+                    "Derecho de portabilidad automatizada."
+                ],
+                correct: 2,
+                explanation: "El derecho de oposición permite al interesado detener tratamientos específicos basados en su situación o, de forma absoluta, cuando el fin sea la publicidad o marketing."
+            },
+            {
+                question: "🧩 ¿Qué es la 'autodeterminación informativa' según la doctrina jurisprudencial del Tribunal Constitucional?",
+                options: [
+                    "El derecho de las operadoras de red a fijar las tarifas de tráfico de datos.",
+                    "La facultad de los ciudadanos de controlar sus datos personales, decidir cuáles transfieren a terceros y conocer su vida útil.",
+                    "La automatización obligatoria de los sistemas lógicos mediante IA.",
+                    "La soberanía estatal para bloquear el acceso internacional a Internet."
+                ],
+                correct: 1,
+                explanation: "Es el núcleo fundamental de la protección de datos: el poder jurídico del ciudadano para gobernar su información, sea íntima o no."
+            },
+            {
+                question: "📋 La LOPDGDD introdujo el 'sistema por capas' para cumplir con el deber de información. ¿Qué elemento es obligatorio incluir en la primera capa o capa básica?",
+                options: [
+                    "El código fuente íntegro del sistema de cifrado informático.",
+                    "La identidad del responsable, la finalidad del tratamiento y la posibilidad de ejercer los derechos lógicos.",
+                    "La lista detallada de todos los empleados con acceso a los sistemas.",
+                    "El contrato de prestación de servicios firmado con el encargado."
+                ],
+                correct: 1,
+                explanation: "La capa básica (artículo 11 LOPDGDD) debe ser clara y directa, mostrando quién trata los datos, para qué y cómo el ciudadano puede ejercer sus derechos."
+            },
+            {
+                question: "🔍 Si los datos personales NO se obtienen directamente del interesado, sino de un tercero, ¿de qué plazo dispone el responsable para cumplir con el deber de información?",
+                options: [
+                    "Debe informarle en un plazo razonable, que no supere en ningún caso el mes de duración.",
+                    "De forma inmediata en los primeros 10 segundos del volcado de base de datos.",
+                    "Exactamente a las 72 horas de registrar la clave externa.",
+                    "No tiene obligación de informar si los datos provienen de una fuente comercial externa."
+                ],
+                correct: 0,
+                explanation: "El artículo 14 del RGPD estipula que si los datos provienen de un tercero, se debe informar al afectado en un plazo razonable que no exceda de un mes."
+            },
+            {
+                question: "💰 ¿Bajo qué circunstancias puede el responsable del tratamiento cobrar un canon financiero por tramitar un derecho de acceso?",
+                options: [
+                    "En todos los casos, dado que el RGPD establece que los derechos son costosos de mantener.",
+                    "Cuando las solicitudes sean manifiestamente infundadas o excesivas, especialmente debido a su carácter repetitivo.",
+                    "Solo cuando el usuario solicite la información en un formato de papel certificado.",
+                    "Únicamente si el interesado pertenece a una persona jurídica internacional."
+                ],
+                correct: 1,
+                explanation: "El ejercicio de derechos es gratuito. El cobro de un canon proporcional o la negativa a actuar son excepciones lícitas exclusivas ante solicitudes abusivas o repetitivas."
+            },
+            {
+                question: "🔗 ¿Cuáles son las dos tipologías de medidas de seguridad exigidas de forma conjunta por la normativa de protección de datos personales?",
+                options: [
+                    "Medidas de índole administrativa e índole policial.",
+                    "Medidas de índole técnica y organizativa.",
+                    "Medidas puramente automatizadas e interfaces gráficas.",
+                    "Restricciones de red y cortafuegos de hardware exclusivamente."
+                ],
+                correct: 1,
+                explanation: "El cumplimiento de seguridad exige un enfoque dual: medidas técnicas (cifrado, firewalls, control de accesos) y organizativas (políticas, concienciación, RAT)."
+            },
+            {
+                question: "👨‍💼 ¿En qué supuesto organizativo es estrictamente OBLIGATORIO designar a un Delegado de Protección de Datos (DPD)?",
+                options: [
+                    "En cualquier PYME con más de tres empleados contratados.",
+                    "Cuando el tratamiento sea realizado por una autoridad u organismo público (salvo tribunales en función judicial).",
+                    "Únicamente en empresas que desarrollen videojuegos indie independientes.",
+                    "En organizaciones que procesen exclusivamente datos lógicos comerciales de personas jurídicas."
+                ],
+                correct: 1,
+                explanation: "El artículo 37.1 del RGPD fija los casos obligatorios: organismos públicos, entidades cuyas actividades principales requieran monitorización a gran escala, o tratamientos masivos de datos sensibles."
+            },
+            {
+                question: "📜 ¿Qué titulación o requisito formal exige el RGPD para poder ser nombrado Delegado de Protección de Datos?",
+                options: [
+                    "Estar en posesión de un doctorado en ingeniería de sistemas lógicos de seguridad.",
+                    "Contar con cualidades profesionales, conocimientos especializados del Derecho y la práctica en la materia.",
+                    "Disponer obligatoriamente de la certificación oficial emitida de forma exclusiva por la ENAC.",
+                    "Haber ejercido como magistrado del Tribunal Constitucional durante cinco años."
+                ],
+                correct: 1,
+                explanation: "El RGPD no exige una certificación obligatoria; se basa en las cualidades profesionales y la especialización demostrable en derecho y práctica de protección de datos."
+            },
+            {
+                question: "📌 ¿En qué supuesto legal el tratamiento de datos se considera lícito por la existencia de una 'Relación Contractual'?",
+                options: [
+                    "Cuando el tratamiento es necesario para la ejecución de un contrato en el que el interesado es parte o para medidas precontractuales.",
+                    "Cuando el usuario firma un documento aceptando recibir correos publicitarios masivos perpetuos.",
+                    "Cuando se realiza una transferencia internacional de activos financieros a un tercer país sin control.",
+                    "Cuando el responsable del tratamiento tiene pérdidas económicas en su ejercicio contable."
+                ],
+                correct: 0,
+                explanation: "La relación contractual legitima el tratamiento de datos esenciales para desplegar el servicio solicitado por el cliente (ej. la dirección para entregar una compra)."
+            },
+            {
+                question: "🧬 Si un hospital trata los datos personales de un paciente inconsciente que ha ingresado de urgencia médica para salvar su vida, ¿cuál es la base jurídica de licitud?",
+                options: [
+                    "El consentimiento explícito digital firmado por el paciente.",
+                    "La satisfacción de los intereses legítimos comerciales del centro hospitalario.",
+                    "El tratamiento es necesario para proteger intereses vitales del interesado o de otra persona física.",
+                    "El derecho al testamento digital anticipado."
+                ],
+                correct: 2,
+                explanation: "Los intereses vitales amparan la licitud del tratamiento cuando está en peligro inminente la supervivencia física del interesado y este no puede otorgar consentimiento."
+            },
+            {
+                question: "🚨 ¿A quién debe notificar un 'Encargado del tratamiento' si detecta una brecha de seguridad informática en los sistemas que administra?",
+                options: [
+                    "Directamente a los interesados individuales a través de medios electrónicos.",
+                    "Al responsable del tratamiento de forma inmediata y sin dilación indebida.",
+                    "A la Agencia Española de Protección de Datos de forma independiente.",
+                    "Al delegado del gobierno de la comunidad autónoma correspondiente."
+                ],
+                correct: 1,
+                explanation: "El encargado no tiene la potestad ni el vínculo legal para ir a la autoridad de control o al ciudadano; su deber estricto es reportar el fallo al Responsable del tratamiento."
+            },
+            {
+                question: "📊 ¿Qué es una Evaluación de Impacto relativa a la Protección de Datos (EIPD)?",
+                options: [
+                    "Una auditoría financiera para valorar el coste de los equipos de almacenamiento físico.",
+                    "Un proceso para identificar y abordar posibles riesgos de tratamientos de datos que puedan entrañar un alto riesgo para los derechos y libertades.",
+                    "Un test de penetración de red llevado a cabo por un hacker ético externo.",
+                    "El documento donde se recogen las amonestaciones de la autoridad de control."
+                ],
+                correct: 1,
+                explanation: "Bajo la supervisión del DPD, la EIPD es un análisis preventivo obligatorio para tratamientos de alto riesgo que busca mitigar los peligros antes de iniciar el procesamiento."
+            },
+            {
+                question: "⚖️ ¿Qué novedad legislativa singular e histórica introdujo el Título X de la Ley Orgánica española 3/2018 (LOPDGDD)?",
+                options: [
+                    "La creación de la infraestructura de ciberseguridad del estado español.",
+                    "El catálogo y reconocimiento explícito de los nuevos derechos digitales de la ciudadanía.",
+                    "La prohibición absoluta del uso de dispositivos digitales en entornos corporativos.",
+                    "La regulación de las penas de prisión por delitos de revelación de secretos."
+                ],
+                correct: 1,
+                explanation: "La LOPDGDD española dio un paso al frente al añadir al marco clásico de protección de datos un bloque entero (Título X) dedicado a los derechos digitales de los ciudadanos."
+            },
+            {
+                question: "🌐 ¿Qué garantiza exactamente el denominado 'Derecho a la neutralidad de Internet' recogido en el artículo 80 de la LOPDGDD?",
+                options: [
+                    "El acceso gratuito a todos los servicios de streaming comerciales internacionales.",
+                    "Que los proveedores de redes procesen el tráfico de forma equitativa, sin discriminación, restricción ni interferencias según el emisor o contenido.",
+                    "La desconexión total de las redes del estado durante periodos de mantenimiento de ciberseguridad.",
+                    "Que el gobierno gestione los servidores DNS de manera privada."
+                ],
+                correct: 1,
+                explanation: "La neutralidad de la red impide que las operadoras de telecomunicaciones prioricen o ralenticen el tráfico web por motivos comerciales o de interés privado."
+            },
+            {
+                question: "💼 ¿A qué se refiere el artículo 88 de la LOPDGDD con el 'Derecho a la desconexión digital' en el ámbito laboral?",
+                options: [
+                    "A la potestad de los empleados de apagar los servidores centrales de producción de la empresa.",
+                    "Al derecho de los trabajadores a no responder comunicaciones electrónicas fuera de su jornada legal para garantizar su descanso y vida privada.",
+                    "A la obligación de trabajar sin acceso a redes de Internet de banda ancha.",
+                    "A la eliminación de las cuentas de correo corporativo al finalizar el año natural."
+                ],
+                correct: 1,
+                explanation: "Este derecho digital laboral protege la salud de los trabajadores, blindando su tiempo de descanso frente a llamadas o correos fuera del horario de trabajo."
+            },
+            {
+                question: "📹 ¿Qué restricción absoluta impone el artículo 89 de la LOPDGDD sobre la instalación de videovigilancia o grabación de sonidos en el trabajo?",
+                options: [
+                    "Se prohíbe de forma estricta la videovigilancia en las zonas comunes de entrada y salida del edificio.",
+                    "No se permite en ningún caso la instalación de cámaras en lugares destinados al descanso, vestuarios, aseos o comedores.",
+                    "Las cámaras solo pueden capturar imágenes en blanco y negro de baja resolución lúdica.",
+                    "Requiere la aprobación individual firmada ante notario de cada empleado de la plantilla."
+                ],
+                correct: 1,
+                explanation: "Por respeto al derecho a la intimidad, queda terminantemente prohibido ubicar sistemas de captación de imágenes o audio en zonas privadas de descanso o higiene."
+            },
+            {
+                question: "🗺️ ¿Bajo qué condición lícita puede una empresa emplear sistemas de geolocalización para controlar a los trabajadores?",
+                options: [
+                    "De forma encubierta y secreta para evitar sabotajes lógicos.",
+                    "Informando de manera expresa, clara y previa a los trabajadores y a sus representantes sobre la existencia y fin de dichos dispositivos.",
+                    "Únicamente si el empleado viaja fuera de las fronteras de la Unión Europea.",
+                    "La geolocalización laboral está totalmente prohibida bajo cualquier contexto corporativo."
+                ],
+                correct: 1,
+                explanation: "El artículo 90 de la LOPDGDD permite el rastreo por motivos de control laboral (ej. vehículos de reparto) siempre que haya transparencia total y previa hacia el personal."
+            },
+            {
+                question: "🌐 ¿Qué regula el 'Derecho al olvido en búsquedas de Internet' según el artículo 93 de la LOPDGDD?",
+                options: [
+                    "La eliminación completa y física de la noticia original alojada en el servidor de un medio de comunicación histórico.",
+                    "El derecho a exigir que los motores de búsqueda eliminen de las listas de resultados las búsquedas realizadas por el nombre del ciudadano si los datos son inadecuados o irrelevantes.",
+                    "El borrado automático de los registros del Registro Civil del Estado.",
+                    "La alteración del orden de indexación de los algoritmos de búsqueda para beneficiar a marcas comerciales."
+                ],
+                correct: 1,
+                explanation: "El derecho al olvido digital de búsqueda no borra la noticia de la fuente original (libertad de información), sino que desindexa el enlace de los motores de búsqueda ante consultas nominales."
+            },
+            {
+                question: "💀 ¿En qué consiste el novedoso 'Derecho al testamento digital' incorporado en el artículo 96 de la LOPDGDD?",
+                options: [
+                    "En la herencia automatizada de las criptomonedas a través de un contrato inteligente de blockchain.",
+                    "La facultad de las personas vinculadas al fallecido por razones familiares o de hecho para dirigirse a los servicios web y acceder, rectificar o suprimir sus perfiles y contenidos.",
+                    "La obligación de las redes sociales de borrar todas las cuentas el mismo día del deceso físico.",
+                    "El registro obligatorio de los bienes materiales ante la Agencia Española de Protección de Datos."
+                ],
+                correct: 1,
+                explanation: "El testamento digital otorga legitimación a herederos o familiares designados para gestionar la huella digital (perfiles, datos, contenidos) del fallecido en la red."
+            },
+            {
+                question: "🧩 ¿Qué carácter legislativo tienen los artículos del Título X de la LOPDGDD relativos a la neutralidad de Internet y acceso universal?",
+                options: [
+                    "Tienen carácter de Ley Orgánica estricta de máxima jerarquía constitucional.",
+                    "Tienen naturaleza de ley ordinaria y no carácter orgánico.",
+                    "Operan como meros reglamentos internos sin rango legal formal.",
+                    "Son directivas europeas no transpuestas en el territorio español."
+                ],
+                correct: 1,
+                explanation: "La disposición final primera aclara que determinados preceptos del Título X (como los artículos 79, 80, 81, 82, 88, 95, 96 y 97) poseen naturaleza de ley ordinaria."
+            },
+            {
+                question: "📊 ¿A disposición de quién debe ponerse el Registro de Actividades del Tratamiento (RAT) según el artículo 30.4 del RGPD?",
+                options: [
+                    "A disposición de cualquier usuario o competidor comercial que lo solicite por escrito.",
+                    "De la autoridad de control (AEPD) que así lo solicite para sus labores de inspección.",
+                    "Únicamente de los accionistas mayoritarios de la persona jurídica.",
+                    "Del Delegado de Protección de Datos para su venta en el mercado de activos."
+                ],
+                correct: 1,
+                explanation: "El RAT es un documento interno auditable. No es público, pero debe entregarse de forma obligatoria a la Autoridad de Control cuando realice una inspección o requerimiento."
+            },
+            {
+                question: "🧹 ¿En qué supuesto NO aplica el derecho de supresión de datos personales (el derecho al borrado)?",
+                options: [
+                    "Cuando los datos personales ya no sean necesarios para los fines originales.",
+                    "Cuando el tratamiento sea estrictamente necesario para el reconocimiento, ejercicio o defensa de demandas judiciales.",
+                    "Cuando el interesado retire voluntariamente el consentimiento que legitimaba el fichero.",
+                    "Cuando los datos hayan sido capturados de forma ilícita e ilegal por el responsable."
+                ],
+                correct: 1,
+                explanation: "El derecho al borrado no es absoluto; se bloquea legítimamente si el responsable necesita conservar los datos para defenderse en un procedimiento judicial o cumplir obligaciones legales."
+            },
+            {
+                question: "📉 ¿En qué consiste exactamente el derecho a la 'limitación del tratamiento'?",
+                options: [
+                    "En reducir el tamaño en bytes que ocupan los registros lógicos en la base de datos física.",
+                    "En solicitar la suspensión temporal del tratamiento de los datos mientras se verifica su exactitud o prevalencia de motivos legítimos.",
+                    "En prohibir que los datos personales salgan de las fronteras físicas de la comunidad autónoma.",
+                    "En limitar el número de clientes que pueden registrarse en la web durante un mes."
+                ],
+                correct: 1,
+                explanation: "La limitación paraliza temporalmente el uso de los datos en los sistemas informáticos (marcando los registros), conservándolos pero impidiendo que se sigan procesando o alterando."
+            },
+            {
+                question: "📂 ¿Qué características técnicas exige el derecho a la 'portabilidad de los datos' al entregar la información al interesado?",
+                options: [
+                    "Entregarlos impresos en papel certificado de alta seguridad de forma física.",
+                    "Facilitarlos en un formato estructurado, de uso habitual y de lectura mecánica (ej. JSON, CSV).",
+                    "Alojarlos en una red privada virtual de acceso exclusivo militar.",
+                    "El RGPD prohíbe que los datos sean legibles por otros sistemas externos informáticos."
+                ],
+                correct: 1,
+                explanation: "La portabilidad persigue que el ciudadano pueda llevarse sus datos de una plataforma a otra fácilmente, exigiendo formatos estándar interoperables y de lectura mecánica."
+            },
+            {
+                question: "🛡️ ¿Cuál es el organismo público estatal encargado de velar por el cumplimiento de esta normativa en el territorio español?",
+                options: [
+                    "La Red Española Informativa de Cumplimiento.",
+                    "La Agencia Española de Protección de Datos (AEPD).",
+                    "El Instituto Nacional de Ciberseguridad (INCIBE) de forma exclusiva.",
+                    "El Defensor del Pueblo de las Comunidades Autónomas."
+                ],
+                correct: 1,
+                explanation: "La Agencia Española de Protección de Datos (AEPD) ejerce como la Autoridad de Control principal y soberana para fiscalizar, asesorar y sancionar en esta materia en España."
+            },
+            {
+                question: "🚨 ¿Qué tres dimensiones del dato informático se ven comprometidas o dañadas estructuralmente en una 'violación de la seguridad de los datos' (brecha de seguridad)?",
+                options: [
+                    "La redundancia, la indexación física y el cifrado de red.",
+                    "La confidencialidad, la integridad y la disponibilidad de los datos personales.",
+                    "La velocidad de transmisión, el dominio de hosting y el espacio de disco.",
+                    "La interfaz de usuario, las contraseñas administrativas y el ancho de banda."
+                ],
+                correct: 1,
+                explanation: "Toda quiebra de seguridad (ciberataque o accidente físico) se traduce penal y técnicamente en la destrucción, alteración (integridad), pérdida (disponibilidad) o acceso no autorizado (confidencialidad) de los datos."
+            },
+            {
+                question: "🔎 ¿A partir de qué momento histórico europeo comenzó a fraguarse y nacer el derecho a la protección de datos como una disciplina autónoma?",
+                options: [
+                    "Tras la aprobación del Tratado de Funcionamiento de la Unión Europea en 2010.",
+                    "En la década de los años 70 y 80 en Europa, con el advenimiento de la sociedad de la información y la informática.",
+                    "Inmediatamente después de la Declaración Universal de Derechos Humanos de 1948.",
+                    "En el año 2016 con la publicación directa del reglamento RGPD."
+                ],
+                correct: 1,
+                explanation: "El texto histórico relata que nació en los años 70 y 80 como respuesta a los primeros ordenadores y sistemas de computación masivos capaces de procesar flujos de información privada."
+            },
+            {
+                question: "🎯 ¿Cuál es el fin último que persigue el derecho a la protección de datos para la dignidad humana según la STC 292/2000?",
+                options: [
+                    "Garantizar la maximización de los beneficios económicos de las empresas tecnológicas.",
+                    "Impedir el tráfico ilícito y lesivo de la información personal para salvaguardar la dignidad y derecho del afectado.",
+                    "Obligar a la desconexión total de todos los ciudadanos del entorno de Internet.",
+                    "Crear un registro policial unificado de las actividades cotidianas en línea."
+                ],
+                correct: 1,
+                explanation: "La sentencia del Tribunal Constitucional proclama que este control busca impedir que la informática degrade la dignidad de los individuos evitando flujos lesivos de información."
+            }
+        ];
+
+        let gameQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answered = false;
+        let maxQuestionsTarget = 10;
+
+        const setupScreen = document.getElementById('setup-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const endScreen = document.getElementById('end-screen');
+        
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackDiv = document.getElementById('feedback');
+        const nextBtn = document.getElementById('next-btn');
+        const progressBar = document.getElementById('progress-bar');
+        const qCounter = document.getElementById('q-counter');
+        const scoreSpan = document.getElementById('score');
+        const questionNumber = document.getElementById('question-number');
+        const endTitle = document.getElementById('end-title');
+        const finalScore = document.getElementById('final-score');
+
+        // Mezcla aleatoria perfecta por Fisher-Yates
+        function shuffleQuestions(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function startGame(totalQuestions) {
+            maxQuestionsTarget = totalQuestions;
+            currentQuestionIndex = 0;
+            score = 0;
+
+            let shuffled = shuffleQuestions([...allQuestions]);
+            gameQuestions = shuffled.slice(0, maxQuestionsTarget);
+
+            setupScreen.style.display = 'none';
+            endScreen.style.display = 'none';
+            gameScreen.style.display = 'block';
+
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            answered = false;
+            nextBtn.style.display = 'none';
+            feedbackDiv.className = 'feedback';
+            feedbackDiv.style.display = 'none';
+            
+            const currentQ = gameQuestions[currentQuestionIndex];
+            questionText.innerHTML = currentQ.question;
+            questionNumber.textContent = `⚖️ Precepto ${currentQuestionIndex + 1} de ${gameQuestions.length}`;
+            
+            qCounter.textContent = `${currentQuestionIndex + 1}/${gameQuestions.length}`;
+            scoreSpan.textContent = score;
+            
+            const progressPercent = (currentQuestionIndex / gameQuestions.length) * 100;
+            progressBar.style.width = `${progressPercent}%`;
+
+            optionsContainer.innerHTML = '';
+
+            currentQ.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.classList.add('option-btn');
+                button.innerHTML = `<span class="code-style">${String.fromCharCode(65 + index)}</span> ${option}`;
+                button.addEventListener('click', () => checkAnswer(index, button));
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        function checkAnswer(selectedIndex, selectedButton) {
+            if (answered) return;
+            answered = true;
+
+            const currentQ = gameQuestions[currentQuestionIndex];
+            const allButtons = optionsContainer.querySelectorAll('.option-btn');
+
+            allButtons.forEach(btn => btn.disabled = true);
+            allButtons[currentQ.correct].classList.add('correct');
+
+            if (selectedIndex === currentQ.correct) {
+                score += 10;
+                scoreSpan.textContent = score;
+                feedbackDiv.className = 'feedback show correct-bg';
+                feedbackDiv.innerHTML = `<strong>🎉 ¡Cumplimiento Validado! Excelente ciberabogado.</strong><br>${currentQ.explanation}`;
+            } else {
+                selectedButton.classList.add('incorrect');
+                feedbackDiv.className = 'feedback show incorrect-bg';
+                feedbackDiv.innerHTML = `<strong>❌ ¡Infracción Detectada! Riesgo de sanción administrativa.</strong><br>${currentQ.explanation}`;
+            }
+
+            nextBtn.style.display = 'block';
+        }
+
+        nextBtn.addEventListener('click', () => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < gameQuestions.length) {
+                loadQuestion();
+            } else {
+                showEndScreen(false);
+            }
+        });
+
+        function showEndScreen(isInterrupted) {
+            gameScreen.style.display = 'none';
+            endScreen.style.display = 'block';
+
+            const totalPlayed = isInterrupted ? (answered ? currentQuestionIndex + 1 : currentQuestionIndex) : gameQuestions.length;
+            const maxScore = totalPlayed * 10;
+            
+            progressBar.style.width = '100%';
+
+            if (maxScore === 0) {
+                endTitle.textContent = "🚪 Auditoría Interrumpida";
+                finalScore.innerHTML = "Has cerrado la sesión sin consolidar respuestas. ¡Recuerda que el cumplimiento normativo es vital en ciberseguridad! 🧑‍💻";
+                return;
+            }
+
+            const percentage = Math.round((score / maxScore) * 100);
+
+            if (isInterrupted) {
+                endTitle.textContent = "⏱️ Auditoría Cerrada Anticipadamente";
+                endTitle.style.color = "var(--accent)";
+            } else if (percentage >= 90) {
+                endTitle.textContent = "⚖️ ¡Oficial de Cumplimiento / DPD de Élite! 🏆";
+                endTitle.style.color = "var(--success)";
+            } else if (percentage >= 70) {
+                endTitle.textContent = "😎 ¡Buen nivel, apto para gestionar riesgos legales! 👍";
+                endTitle.style.color = "var(--accent)";
+            } else {
+                endTitle.textContent = "📚 Alerta de No Conformidad: Requiere Repaso 🔍";
+                endTitle.style.color = "var(--error)";
+            }
+
+            finalScore.innerHTML = `Has auditado un total de <strong>${totalPlayed}</strong> preceptos jurídicos.<br>Evaluación: <strong>${score}</strong> de <strong>${maxScore}</strong> puntos posibles.<br>Porcentaje de éxito normativo: <strong>${percentage}%</strong>.`;
+        }
+
+        function returnToMenu() {
+            endScreen.style.display = 'none';
+            setupScreen.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
