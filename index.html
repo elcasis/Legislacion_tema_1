@@ -754,17 +754,15 @@
         let maxQuestionsTarget = 10;
         let currentShuffledOptions = [];
 
-        // ALGORITMO EXCLUSIVO DE MEZCLA SEGURO (Clonación profunda por valor, protegiendo referencias)
+        // ALGORITMO INTEGRAL DE MEZCLA SEGURO (Mantiene el principio de inmutabilidad en memoria)
         function secureShuffle(array) {
-            // Realizamos un clon profundo estructurado para romper dependencias de objetos anidados
-            let deepCopy = JSON.parse(JSON.stringify(array));
-            let currentIndex = deepCopy.length, randomIndex;
+            let currentIndex = array.length, randomIndex;
             while (currentIndex != 0) {
                 randomIndex = Math.floor(Math.random() * currentIndex);
                 currentIndex--;
-                [deepCopy[currentIndex], deepCopy[randomIndex]] = [deepCopy[randomIndex], deepCopy[currentIndex]];
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
             }
-            return deepCopy;
+            return array;
         }
 
         function startGame(totalQuestions) {
@@ -772,9 +770,10 @@
             currentQuestionIndex = 0;
             score = 0;
 
-            // Barajamos el pool general clonándolo de forma profunda
-            let safeShuffledPool = secureShuffle(allQuestions);
-            gameQuestions = safeShuffledPool.slice(0, maxQuestionsTarget);
+            // Clonación profunda limpia utilizando la API moderna nativa del navegador structuredClone
+            let deepClonePool = structuredClone(allQuestions);
+            let shuffledPool = secureShuffle(deepClonePool);
+            gameQuestions = shuffledPool.slice(0, maxQuestionsTarget);
 
             setupScreen.style.display = 'none';
             endScreen.style.display = 'none';
@@ -801,15 +800,15 @@
 
             optionsContainer.innerHTML = '';
 
-            // Mapeamos guardando el flag exacto de acierto según la veracidad original
-            let localOptions = currentQ.options.map((option, idx) => {
+            // Mapeamos las opciones guardando el valor booleano de acierto
+            let optionsMapped = currentQ.options.map((option, idx) => {
                 return { text: option, isCorrect: idx === currentQ.correct };
             });
 
-            // Desordenamos la lista mapeada local de forma segura
-            currentShuffledOptions = secureShuffle(localOptions);
+            // Desordenamos de forma segura sin afectar a la estructura de otras preguntas
+            currentShuffledOptions = secureShuffle(optionsMapped);
 
-            // Renderizamos los botones dinámicamente con su nuevo orden aleatorio
+            // Generamos las opciones interactivas en la pantalla
             currentShuffledOptions.forEach((optionObj, index) => {
                 const button = document.createElement('button');
                 button.classList.add('option-btn');
@@ -828,7 +827,7 @@
 
             allButtons.forEach(btn => btn.disabled = true);
 
-            // Encontramos el índice donde quedó mapeada la respuesta correcta y la iluminamos en verde
+            // Buscamos cuál es el botón que ostenta la verdad en la mezcla actual e iluminamos en verde
             let correctButtonIndex = currentShuffledOptions.findIndex(opt => opt.isCorrect);
             allButtons[correctButtonIndex].classList.add('correct');
 
