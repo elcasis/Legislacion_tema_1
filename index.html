@@ -399,7 +399,7 @@
                     "Sin dilación indebida y, de ser posible, a más tardar 72 horas después de que haya tenido constancia de ella.",
                     "Exactamente 24 horas naturales desde que ocurrió el ciberataque técnico.",
                     "Un plazo flexible de 7 días hábiles de auditoría interna.",
-                    "No hay plazo fijo, basta con incluirlo en el informe anual de seguridad."
+                    "No hay plazo fijo, basta con incluirlo in el informe anual de seguridad."
                 ],
                 correct: 0,
                 explanation: "El artículo 33 del RGPD fija un umbral estricto de un máximo de 72 horas para notificar la brecha a la autoridad de control desde que se tenga constancia de su existencia."
@@ -752,18 +752,18 @@
         let score = 0;
         let answered = false;
         let maxQuestionsTarget = 10;
-        
-        // Variable para almacenar las opciones desordenadas de la pregunta actual junto con su validez
         let currentShuffledOptions = [];
 
-        function shuffleQuestions(array) {
-            let currentIndex = array.length, randomIndex;
+        // Función de mezcla limpia que retorna un nuevo array sin mutar por referencia al original
+        function shuffleArray(array) {
+            let arrCopy = [...array];
+            let currentIndex = arrCopy.length, randomIndex;
             while (currentIndex != 0) {
                 randomIndex = Math.floor(Math.random() * currentIndex);
                 currentIndex--;
-                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+                [arrCopy[currentIndex], arrCopy[randomIndex]] = [arrCopy[randomIndex], arrCopy[currentIndex]];
             }
-            return array;
+            return arrCopy;
         }
 
         function startGame(totalQuestions) {
@@ -771,8 +771,9 @@
             currentQuestionIndex = 0;
             score = 0;
 
-            let shuffled = shuffleQuestions([...allQuestions]);
-            gameQuestions = shuffled.slice(0, maxQuestionsTarget);
+            // Barajamos el pool principal de preguntas de forma segura
+            let shuffledPool = shuffleArray(allQuestions);
+            gameQuestions = shuffledPool.slice(0, maxQuestionsTarget);
 
             setupScreen.style.display = 'none';
             endScreen.style.display = 'none';
@@ -799,15 +800,15 @@
 
             optionsContainer.innerHTML = '';
 
-            // Mapeamos las opciones guardando explícitamente cuál es la correcta
-            currentShuffledOptions = currentQ.options.map((option, idx) => {
+            // Mapeamos las opciones guardando el valor de veracidad antes de mezclar las respuestas de la pregunta
+            let optionsMapped = currentQ.options.map((option, idx) => {
                 return { text: option, isCorrect: idx === currentQ.correct };
             });
 
-            // Desordenamos aleatoriamente las opciones mapeadas
-            shuffleQuestions(currentShuffledOptions);
+            // Desordenamos la copia local de las opciones
+            currentShuffledOptions = shuffleArray(optionsMapped);
 
-            // Renderizamos los botones dinámicamente
+            // Pintamos los botones vinculando el índice de la posición actual desordenada
             currentShuffledOptions.forEach((optionObj, index) => {
                 const button = document.createElement('button');
                 button.classList.add('option-btn');
@@ -826,11 +827,11 @@
 
             allButtons.forEach(btn => btn.disabled = true);
 
-            // Buscamos y marcamos visualmente cuál botón contiene la respuesta correcta
+            // Buscamos cuál es el botón que ostenta la verdad en la mezcla actual y lo iluminamos
             let correctButtonIndex = currentShuffledOptions.findIndex(opt => opt.isCorrect);
             allButtons[correctButtonIndex].classList.add('correct');
 
-            // Evaluamos si el objeto de la opción seleccionada es el correcto
+            // Evaluamos si el elemento del índice pulsado contiene el flag de acierto
             if (currentShuffledOptions[selectedIndex].isCorrect) {
                 score += 10;
                 scoreSpan.textContent = score;
