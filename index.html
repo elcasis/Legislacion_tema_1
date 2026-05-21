@@ -752,23 +752,10 @@
         let score = 0;
         let answered = false;
         let maxQuestionsTarget = 10;
-
-        const setupScreen = document.getElementById('setup-screen');
-        const gameScreen = document.getElementById('game-screen');
-        const endScreen = document.getElementById('end-screen');
         
-        const questionText = document.getElementById('question-text');
-        const optionsContainer = document.getElementById('options-container');
-        const feedbackDiv = document.getElementById('feedback');
-        const nextBtn = document.getElementById('next-btn');
-        const progressBar = document.getElementById('progress-bar');
-        const qCounter = document.getElementById('q-counter');
-        const scoreSpan = document.getElementById('score');
-        const questionNumber = document.getElementById('question-number');
-        const endTitle = document.getElementById('end-title');
-        const finalScore = document.getElementById('final-score');
+        // Variable para almacenar las opciones desordenadas de la pregunta actual junto con su validez
+        let currentShuffledOptions = [];
 
-        // Mezcla aleatoria perfecta por Fisher-Yates
         function shuffleQuestions(array) {
             let currentIndex = array.length, randomIndex;
             while (currentIndex != 0) {
@@ -812,10 +799,19 @@
 
             optionsContainer.innerHTML = '';
 
-            currentQ.options.forEach((option, index) => {
+            // Mapeamos las opciones guardando explícitamente cuál es la correcta
+            currentShuffledOptions = currentQ.options.map((option, idx) => {
+                return { text: option, isCorrect: idx === currentQ.correct };
+            });
+
+            // Desordenamos aleatoriamente las opciones mapeadas
+            shuffleQuestions(currentShuffledOptions);
+
+            // Renderizamos los botones dinámicamente
+            currentShuffledOptions.forEach((optionObj, index) => {
                 const button = document.createElement('button');
                 button.classList.add('option-btn');
-                button.innerHTML = `<span class="code-style">${String.fromCharCode(65 + index)}</span> ${option}`;
+                button.innerHTML = `<span class="code-style">${String.fromCharCode(65 + index)}</span> ${optionObj.text}`;
                 button.addEventListener('click', () => checkAnswer(index, button));
                 optionsContainer.appendChild(button);
             });
@@ -829,9 +825,13 @@
             const allButtons = optionsContainer.querySelectorAll('.option-btn');
 
             allButtons.forEach(btn => btn.disabled = true);
-            allButtons[currentQ.correct].classList.add('correct');
 
-            if (selectedIndex === currentQ.correct) {
+            // Buscamos y marcamos visualmente cuál botón contiene la respuesta correcta
+            let correctButtonIndex = currentShuffledOptions.findIndex(opt => opt.isCorrect);
+            allButtons[correctButtonIndex].classList.add('correct');
+
+            // Evaluamos si el objeto de la opción seleccionada es el correcto
+            if (currentShuffledOptions[selectedIndex].isCorrect) {
                 score += 10;
                 scoreSpan.textContent = score;
                 feedbackDiv.className = 'feedback show correct-bg';
